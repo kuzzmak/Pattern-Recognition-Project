@@ -51,6 +51,21 @@ def nearest_square(current: tuple, square_size: int) -> Tuple[tuple, tuple]:
     return (y_bound_down, x_bound_left), (y_bound_up, x_bound_right)
 
 
+def add_square(svois, square_size, frame, dot):
+    nearest = nearest_square(dot.ravel(), square_size)
+    # upper left and lower right corner of the square area
+    p1, p2 = nearest
+    square_from_image = frame[p1[0]:p2[0], p1[1]:p2[1]]
+    if square_from_image.shape == (square_size, square_size):
+        if nearest not in svois:
+            # no entry for this square yet
+            svois[nearest] = [square_from_image]
+        else:
+            # add this frame to the existing frames
+            svois[nearest].append(square_from_image)
+    pass
+
+
 def SVOI(path_to_images, temporal_length, square_size):
 
     if not os.path.exists(path_to_images):
@@ -71,6 +86,8 @@ def SVOI(path_to_images, temporal_length, square_size):
         im_path = os.path.join(path_to_images, images[1 + i])
         memory_images.put(cv.cvtColor(cv.imread(im_path), cv.COLOR_BGR2GRAY))
 
+    p0 = cv.goodFeaturesToTrack(old_gray, mask=None, **feature_params)
+
     # go through all images
     for i, im in enumerate(images, start=1):
         # if there are less frames left than temporal_length, stop generator
@@ -81,13 +98,13 @@ def SVOI(path_to_images, temporal_length, square_size):
         memory_images.get()
         temporal_images = list(memory_images.queue)
 
+        # dictionary of regions(squares) of interest, if every square has
+        # key of dictionary has temporal_length squares, it is considered
+        # informative and thus returned by generator along with others
+        # key=square boundaries, value=temporal_length squares
+        svois = {}
         # extracting SVOI from temporal_length images
-        for j, temp_im in enumerate(temporal_images):
-            # dictionary of SVOIs, key=square boundaries, value=temporal_length squares
-            svois = {}
-            p0 = cv.goodFeaturesToTrack(old_gray, mask=None, **feature_params)
-
-            frame_gray = temp_im
+        for j, frame_gray in enumerate(temporal_images):
             # calculate optical flow
             p1, st, err = cv.calcOpticalFlowPyrLK(old_gray, frame_gray, p0, None, **lk_params)
             # select good points
@@ -95,28 +112,30 @@ def SVOI(path_to_images, temporal_length, square_size):
             good_old = p0[st == 1]
 
             for k, (new, old) in enumerate(zip(good_new, good_old)):
-                # dictionary of regions(squares) of interest, if every square has
-                # key of dictionary has temporal_length squares, it is considered
-                # informative and thus returned by generator along with others
-                nearest = nearest_square(old.ravel(), square_size)
-                # upper left and lower right corner of the square area
-                p1, p2 = nearest
-                square_from_image = frame_gray[p1[0]:p2[0]+1, p1[1]:p2[1]+1]
-                if svois.get(nearest) is None:
-                    # no entry for this square yet
-                    svois[nearest] = [square_from_image]
-                else:
-                    # add this frame to the existing frames
-                    svois[nearest] = svois[nearest].append(square_from_image)
+                if i == 1:
+                    # squares of first image
+                    add_square(svois, square_size, frame_gray, old)
+                # squares from images that follow
+                add_square(svois, square_size, frame_gray, new)
 
             # now update the previous frame and previous points
             old_gray = frame_gray.copy()
             p0 = good_new.reshape(-1, 1, 2)
 
+        im_path = os.path.join(path_to_images, images[i + temporal_length - 1])
+        memory_images.put(cv.cvtColor(cv.imread(im_path), cv.COLOR_BGR2GRAY))
 
-for img in SVOI(os.path.join('data', 'UCSD_Anomaly_Dataset.v1p2', 'UCSDped1', 'Train', 'Train001'), 7, 15):
-    print(img)
+        svois_of_interest = []
+        for key, value in svois.items():
+            if len(value) >= temporal_length:
+                svois_of_interest.append(np.array(value))
+        yield svois_of_interest
 
+
+si = SVOI(os.path.join('data', 'UCSD_Anomaly_Dataset.v1p2', 'UCSDped1', 'Train', 'Train001'), 7, 15)
+n = next(si)
+n1 = next(si)
+print(len(n))
 
 # p0 = cv.goodFeaturesToTrack(old_gray, mask=None, **feature_params)
 # mask = np.zeros_like(old_frame)

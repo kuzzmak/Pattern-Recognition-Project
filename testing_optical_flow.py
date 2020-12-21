@@ -7,12 +7,12 @@ import queue
 from typing import Tuple
 
 feature_params = dict(maxCorners=100,
-                      qualityLevel=0.3,
+                      qualityLevel=0.2,
                       minDistance=7,
                       blockSize=7)
 
 lk_params = dict(winSize=(15, 15),
-                 maxLevel=2,
+                 maxLevel=5,
                  criteria=(cv.TERM_CRITERIA_EPS | cv.TERM_CRITERIA_COUNT, 10, 0.03))
 
 pic_num = 1
@@ -52,7 +52,7 @@ def nearest_square(current: tuple, square_size: int) -> Tuple[tuple, tuple]:
 
 
 def add_square(svois, square_size, frame, dot):
-    nearest = nearest_square(dot.ravel(), square_size)
+    nearest = nearest_square(np.flipud(dot).ravel(), square_size)
     # upper left and lower right corner of the square area
     p1, p2 = nearest
     square_from_image = frame[p1[0]:p2[0], p1[1]:p2[1]]
@@ -63,10 +63,9 @@ def add_square(svois, square_size, frame, dot):
         else:
             # add this frame to the existing frames
             svois[nearest].append(square_from_image)
-    pass
 
 
-def SVOI(path_to_images, temporal_length, square_size):
+def SVOI(path_to_images: str, temporal_length: int, square_size: int) -> dict:
 
     if not os.path.exists(path_to_images):
         raise FileNotFoundError(f'directory: {path_to_images} does not exists')
@@ -101,7 +100,7 @@ def SVOI(path_to_images, temporal_length, square_size):
         # dictionary of regions(squares) of interest, if every square has
         # key of dictionary has temporal_length squares, it is considered
         # informative and thus returned by generator along with others
-        # key=square boundaries, value=temporal_length squares
+        # {key=square boundaries, value=list of temporal_length squares}
         svois = {}
         # extracting SVOI from temporal_length images
         for j, frame_gray in enumerate(temporal_images):
@@ -112,7 +111,7 @@ def SVOI(path_to_images, temporal_length, square_size):
             good_old = p0[st == 1]
 
             for k, (new, old) in enumerate(zip(good_new, good_old)):
-                if i == 1:
+                if j == 0:
                     # squares of first image
                     add_square(svois, square_size, frame_gray, old)
                 # squares from images that follow
@@ -125,21 +124,83 @@ def SVOI(path_to_images, temporal_length, square_size):
         im_path = os.path.join(path_to_images, images[i + temporal_length - 1])
         memory_images.put(cv.cvtColor(cv.imread(im_path), cv.COLOR_BGR2GRAY))
 
-        svois_of_interest = []
+        svois_of_interest = {}
         for key, value in svois.items():
             if len(value) >= temporal_length:
-                svois_of_interest.append(np.array(value))
+                svois_of_interest[key] = value
         yield svois_of_interest
 
 
-si = SVOI(os.path.join('data', 'UCSD_Anomaly_Dataset.v1p2', 'UCSDped1', 'Train', 'Train001'), 7, 15)
-n = next(si)
-n1 = next(si)
-print(len(n))
+path = os.path.join('data', 'UCSD_Anomaly_Dataset.v1p2', 'UCSDped1', 'Train', 'Train001')
+images = [x for x in os.listdir(path) if x.endswith(".tif")]
+si = SVOI(path, 7, 15)
 
+svois = next(si)
+im0 = cv.imread(os.path.join(path, images[0]), 0)
+for i in range(7):
+
+    for key, value in svois.items():
+        # invert x and y coordinates
+        t1, t2 = key
+        p1 = (t1[1], t1[0])
+        p2 = (t2[1], t2[0])
+        cv.rectangle(im0, p1, p2, (0, 255, 0), 1)
+        # cv.imshow('im', im0)
+        # cv.waitKey(0)
+    cv.imshow('im', im0)
+    cv.waitKey(0)
+    im0 = cv.imread(os.path.join(path, images[i+1]), 0)
+    svois = next(si)
+
+
+# img = np.zeros((512, 512, 3), np.uint8)
+# p1 = (75, 120)
+# p2 = (90, 135)
+# cv.rectangle(img, p1, p2, (0, 255, 0), 1)
+# cv.imshow('im', img)
+# cv.waitKey(0)
+# n = next(si)
+# n1 = next(si)
+# n2 = next(si)
+# print(len(n))
+# print(len(n1))
+# print(len(n2))
+
+# old_frame = cv.imread(f'data/UCSD_Anomaly_Dataset.v1p2/UCSDped1/Train/Train001/001.tif')
+# old_gray = cv.cvtColor(old_frame, cv.COLOR_BGR2GRAY)
+#
 # p0 = cv.goodFeaturesToTrack(old_gray, mask=None, **feature_params)
 # mask = np.zeros_like(old_frame)
 #
+# path = os.path.join('data', 'UCSD_Anomaly_Dataset.v1p2', 'UCSDped1', 'Train', 'Train001')
+# images = [x for x in os.listdir(path) if x.endswith(".tif")]
+#
+# for pic in range(1, len(images)):
+#     old_gray = cv.imread(os.path.join(path, images[pic]), 0)
+#     p0 = cv.goodFeaturesToTrack(old_gray, mask=None, **feature_params)
+#     for dot in p0[:, 0]:
+#         o = dot.ravel()
+#         f = np.flipud(dot).ravel()
+#         d = (dot[0], dot[1])
+#         p1, p2 = nearest_square((dot[1], dot[0]), 15)
+#         print(dot)
+#
+#         square_from_image = old_gray[p1[0]:p2[0], p1[1]:p2[1]]
+#         if square_from_image.shape[0] < 2 or square_from_image.shape[1] < 2:
+#             continue
+#         print(square_from_image.shape)
+#         cv.circle(old_frame, d, 3, (0, 0, 255), -1)
+#         cv.rectangle(old_frame, p1, p1, (0, 0, 255), 1)
+#         cv.imshow('im', old_frame)
+#         cv.imshow('im2', square_from_image)
+#         cv.waitKey(0)
+#
+#     cv.imshow('im', old_gray)
+#     cv.waitKey(0)
+
+# cv.imshow('im', old_gray)
+# cv.waitKey(0)
+
 # while 1:
 #     pic_num += 1
 #     if pic_num > num_of_pics:

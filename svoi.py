@@ -3,6 +3,8 @@ import cv2 as cv
 
 import util
 
+from typing import Tuple
+
 
 class SVOI:
 
@@ -14,10 +16,26 @@ class SVOI:
         SVOIs. Useful SVOI is SVOI in which at least p_s percent of pixels are
         moving. For moving pixels Farneback method for deep optical flow is used.
 
-        :param image_paths: paths of all images used in SVOI extraction
-        :param resize_images: resize images in a way that each size is the multiple of the square size
-        :param temporal_length: how many frames in time domain is used in SVOI
-        :param square_size: size of the square into which image is divided
+        How to use:
+        -----------
+        folder_path = os.path.join('data', 'UCSD_Anomaly_Dataset.v1p2', 'UCSDped1', 'Train', 'Train001')
+        image_paths = util.get_image_paths(folder_path, ".tiff")
+        sv = SVOI(image_paths)
+        for s in sv.generator():
+            for square, svoi in s.items():
+                do something with square boundaries or SVOI...
+
+
+        Parameters
+        ----------
+        image_paths: List[str]
+            paths of all images used in SVOI extraction
+        resize_images: bool
+            resize images in a way that each size is the multiple of the square size
+        temporal_length: int
+            how many frames in time domain is used in SVOI
+        square_size: int
+            size of the square into which image is divided
         """
 
         self.image_paths = image_paths
@@ -103,7 +121,16 @@ class SVOI:
                 svois[k] = svoi
         return svois
 
-    def generator(self):
+    def generator(self) -> dict[Tuple[tuple, tuple]: np.ndarray]:
+        """
+        Generator function for getting SVOIs from frames.
+
+        Returns
+        -------
+        dictionary: dict[Tuple[tuple, tuple]: np.ndarray]
+            dictionary where keys are squares (upper left and lower right corner)
+            and values are SVOIs (temporal_length frames)
+        """
 
         for i in range(0, len(self.image_paths), self.temporal_length):
 

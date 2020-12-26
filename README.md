@@ -7,10 +7,10 @@ onom koji je opisan u radu: „Spatial-temporal Convolutional Neural Networks fo
 Crowded Scenes”, S. Zhou, W. Shen, D. Zeng, M. Fang, Y. Wei, Z. Zhang, (2016). Programski sustav testirati i usporediti
 s orginalnim radom na sljedećim bazama: UCSD Dataset, UMN dataset.
 
-###TODO lista
+### TODO lista
 
 Primarno:
-- [ ] (1) izvlačenje SVOI-ja iz slika
+- [x] (1) izvlačenje SVOI-ja iz slika
 - [ ] (2) proučiti konvolucijske mreže i napraviti arhitekturu (u kodu)
 - [ ] (3) organizirati oznake UCSD dataseta da ih se lako učita u program
 - [ ] (4) podijeliti onaj drugi dataset u frameove i označiti ih na smislen način

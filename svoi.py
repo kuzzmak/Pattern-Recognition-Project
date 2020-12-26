@@ -6,16 +6,31 @@ import util
 
 class SVOI:
 
-    def __init__(self, image_paths, image_shape, resize_images=False, temporal_length=7, square_size=15):
+    def __init__(self, image_paths, resize_images=False, temporal_length=7, square_size=15):
+        """
+        Class used for extracting spatial-temporal volumes of interest (SVOI).
+        SVOI consists of temporal_length frames in time domain. Although it's
+        easy to extract all SVOIs from frames, here are extracted only "useful"
+        SVOIs. Useful SVOI is SVOI in which at least p_s percent of pixels are
+        moving. For moving pixels Farneback method for deep optical flow is used.
+
+        :param image_paths: paths of all images used in SVOI extraction
+        :param resize_images: resize images in a way that each size is the multiple of the square size
+        :param temporal_length: how many frames in time domain is used in SVOI
+        :param square_size: size of the square into which image is divided
+        """
 
         self.image_paths = image_paths
-        self.image_shape = image_shape
         self.resize_images = resize_images
         self.temporal_length = temporal_length
         self.square_size = square_size
-
+        # shape of every image used in SVOI extraction
+        self.image_shape = cv.imread(self.image_paths[0]).shape
+        # change image shape if resizing is used
+        if resize_images:
+            self.image_shape = util.new_image_shape(self.image_shape, self.square_size)
         # creates an image filled with zero intensities with the same dimensions as the frame
-        self.mask = np.zeros(image_shape, dtype='uint8')
+        self.mask = np.zeros(self.image_shape, dtype='uint8')
         # ets image saturation to maximum
         self.mask[..., 1] = 255
         # total pixels in one frame of a SVOI
@@ -97,7 +112,10 @@ class SVOI:
 
             # temporal_length of frames used for SVOI extraction
             current_frames = []
+            # first image of temporal_length frames
             prev_gray = util.read_image(self.image_paths[i])
+            if self.resize_images:
+                prev_gray = util.resize_image(prev_gray, self.image_shape)
             current_frames.append(prev_gray)
 
             incidence_of_squares_by_frame = {}
@@ -105,7 +123,10 @@ class SVOI:
                 incidence_of_squares_by_frame[j] = {}
 
             for j in range(1, self.temporal_length):
+                # remaining temporal_length - 1 frames
                 gray = util.read_image(self.image_paths[i + j])
+                if self.resize_images:
+                    prev_gray = util.resize_image(prev_gray, self.image_shape)
                 current_frames.append(gray)
 
                 flow = cv.calcOpticalFlowFarneback(prev_gray, gray, None, **self.farneback_params)

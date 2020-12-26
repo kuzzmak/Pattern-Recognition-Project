@@ -1,8 +1,10 @@
 import cv2 as cv
 import numpy as np
 
+import os
 
-def read_image(path, flag=cv.IMREAD_GRAYSCALE):
+
+def read_image(path: str, flag=cv.IMREAD_GRAYSCALE) -> np.ndarray:
     """
     Reads image from path.
 
@@ -13,7 +15,7 @@ def read_image(path, flag=cv.IMREAD_GRAYSCALE):
     return cv.imread(path, flag)
 
 
-def new_image_shape(old_shape, square_size):
+def new_image_shape(old_shape: tuple, square_size: int) -> tuple:
     """
     Returns new images shape where each side of the image
     is multiple of the square_size.
@@ -27,7 +29,7 @@ def new_image_shape(old_shape, square_size):
     return new_x, new_y
 
 
-def resize_image(image, preferred_size):
+def resize_image(image: np.ndarray, preferred_size: tuple) -> np.ndarray:
     """
     Resizes image to the new shape.
 
@@ -36,3 +38,16 @@ def resize_image(image, preferred_size):
     :return: resized image
     """
     return cv.resize(image, preferred_size, interpolation=cv.INTER_AREA)
+
+
+def get_image_paths(folder_path: str, ext: str) -> list:
+    """
+    Function for getting all image path in folder.
+
+    :param folder_path: path to the folder with images
+    :param ext: extension of the images
+    :return: list of image paths
+    """
+    image_names = [x for x in os.listdir(folder_path) if x.endswith(ext)]
+    image_paths = [os.path.join(folder_path, x) for x in image_names]
+    return image_paths

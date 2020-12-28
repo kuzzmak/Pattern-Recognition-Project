@@ -113,7 +113,7 @@ class SVOI:
         for k, v in incidence_of_squares_total.items():
             # image has 3 channels, at least two have to contain square
             if v >= 2:
-                svoi = np.zeros((self.temporal_length, self.square_size, self.square_size))
+                svoi = np.zeros((self.temporal_length, self.square_size, self.square_size), dtype='uint8')
                 p1, p2 = k
                 for i, frame in enumerate(current_frames):
                     square = frame[p1[0]:p2[0], p1[1]:p2[1]]

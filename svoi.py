@@ -3,7 +3,7 @@ import cv2 as cv
 
 import util
 
-from typing import Tuple
+from typing import Tuple, Dict
 
 
 class SVOI:
@@ -19,7 +19,7 @@ class SVOI:
         How to use:
         -----------
         folder_path = os.path.join('data', 'UCSD_Anomaly_Dataset.v1p2', 'UCSDped1', 'Train', 'Train001')
-        image_paths = util.get_image_paths(folder_path, ".tiff")
+        image_paths = util.get_image_paths(folder_path, ".tif")
         sv = SVOI(image_paths)
         for s in sv.generator():
             for square, svoi in s.items():
@@ -113,15 +113,15 @@ class SVOI:
         for k, v in incidence_of_squares_total.items():
             # image has 3 channels, at least two have to contain square
             if v >= 2:
-                svoi = np.zeros((self.square_size, self.square_size, self.temporal_length))
+                svoi = np.zeros((self.temporal_length, self.square_size, self.square_size))
                 p1, p2 = k
                 for i, frame in enumerate(current_frames):
                     square = frame[p1[0]:p2[0], p1[1]:p2[1]]
-                    svoi[:, :, i] = square
+                    svoi[i, :, :] = square
                 svois[k] = svoi
         return svois
 
-    def generator(self) -> dict[Tuple[tuple, tuple]: np.ndarray]:
+    def generator(self) -> Dict[Tuple[tuple, tuple], np.ndarray]:
         """
         Generator function for getting SVOIs from frames.
 

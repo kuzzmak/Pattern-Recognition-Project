@@ -224,7 +224,8 @@ class Net(nn.Module):
         self.c3 = nn.Conv3d(in_channels=24, out_channels=48, kernel_size=(3, 3, 3))  # out [1, 48, 3, 12, 12]
         self.c4 = nn.Conv3d(in_channels=48, out_channels=64, kernel_size=(3, 3, 3))  # out [1, 64, 1, 4, 4]
         self.c5 = nn.Conv3d(in_channels=64, out_channels=64, kernel_size=(1, 4, 4))  # out [1, 64, 1, 1, 1]
-        self.linear = nn.Linear(in_features=64, out_features=128)  # out [1, 128]
+        self.l1 = nn.Linear(in_features=64, out_features=128)  # out [1, 128]
+        self.l2 = nn.Linear(in_features=128, out_features=2)  # out [1, 2]
         self.pol = nn.MaxPool3d(kernel_size=(1, 2, 2), stride=(1, 2, 2))
 
         self.net = nn.Sequential(
@@ -239,7 +240,10 @@ class Net(nn.Module):
 
     def forward(self, x):
         out = self.net(x)
-        return self.linear(out.view(-1, 64))
+        out = self.l1(out.view(-1, 64))
+        out = self.l2(out)
+        print(out.shape)
+        return out
 
 
 if __name__ == "__main__":

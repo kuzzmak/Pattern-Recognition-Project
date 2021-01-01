@@ -18,13 +18,12 @@ class SVOI:
 
         How to use:
         -----------
-        folder_path = os.path.join('data', 'UCSD_Anomaly_Dataset.v1p2', 'UCSDped1', 'Train', 'Train001')
+        folder_path = os.path.join('data', 'UCSD', 'ped1', 'Train', 'Train001')
         image_paths = util.get_image_paths(folder_path, ".tif")
         sv = SVOI(image_paths)
         for s in sv.generator():
             for square, svoi in s.items():
                 do something with square boundaries or SVOI...
-
 
         Parameters
         ----------

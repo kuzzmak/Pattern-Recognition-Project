@@ -28,7 +28,6 @@ class NetModel(nn.Module):
             nn.Linear(in_features=64, out_features=128),  # out [1, 128]
             nn.ReLU(),
             nn.Linear(in_features=128, out_features=2),   # out [1, 2]
-            nn.ReLU(),
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:

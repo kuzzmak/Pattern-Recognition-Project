@@ -8,7 +8,7 @@ from svoi import SVOI
 
 class SVOIDataset(IterableDataset):
 
-    def __init__(self, dataset_path, ext, temporal_length, dataset_params):
+    def __init__(self, dataset_path: str, ext: str, temporal_length: int, dataset_params: dict):
         """
         Class representing iterable dataset where each iteration consists of SVOI
         and corresponding labels for each frame of SVOI.
@@ -31,6 +31,7 @@ class SVOIDataset(IterableDataset):
         dataset_params: dict
             parameters for dataset
         """
+
         self.image_paths = util.get_image_paths(dataset_path, ext)
         self.temporal_length = temporal_length
         self.dataset_params = dataset_params

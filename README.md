@@ -13,8 +13,19 @@ Primarno:
 - [x] (1) izvlačenje SVOI-ja iz slika
 - [ ] (2) proučiti konvolucijske mreže i napraviti arhitekturu (u kodu)
 - [ ] (3) organizirati oznake UCSD dataseta da ih se lako učita u program
+	- [x] (3.1) ped1
+	- [ ] (3.2) ped2
 - [ ] (4) podijeliti onaj drugi dataset u frameove i označiti ih na smislen način
 - [ ] (5) pisanje dokumentacije
+	- [ ] (5.1) projektni zadatak
+		- [x] (5.1.1) opis projektnog zadatka
+		- [x] (5.1.2) pregled i opis srodnih rješenja
+		- [ ] (5.1.3) konceptualno rješenje zadatka
+	- [ ] (5.2) postupak rješavanja zadatka
+	- [ ] (5.3) ispitivanje rješenja
+	- [ ] (5.4) opis programske implementacije rješenja
+	- [ ] (5.5) zaključak
+	- [ ] (5.6) literatura
 
 Sekundarno:
 - [ ] (6) napaviti grafičko sučelje 

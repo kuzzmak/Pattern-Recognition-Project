@@ -38,6 +38,8 @@ class SVOI:
         """
 
         self.image_paths = image_paths
+        assert len(self.image_paths) > 0, "there are no images in folder"
+
         self.resize_images = resize_images
         self.temporal_length = temporal_length
         self.square_size = square_size

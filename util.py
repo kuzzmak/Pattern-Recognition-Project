@@ -9,11 +9,52 @@ import os
 import re
 
 UCSD = 'UCSD'
+PED1 = 'PED1'
+PED2 = 'PED2'
 UCSD_PATH = os.path.join('data', UCSD)
 UCSD_PED1_PATH = os.path.join(UCSD_PATH, 'ped1')
 UCSD_PED2_PATH = os.path.join(UCSD_PATH, 'ped2')
 UCSD_PED1_LABELS_PATH = os.path.join(UCSD_PED1_PATH, 'Test', 'ped1_test_labels.txt')
 UCSD_PED2_LABELS_PATH = os.path.join(UCSD_PED2_PATH, 'Test', 'ped2_test_labels.txt')
+
+UMN = 'UMN'
+INDOOR = 'INDOOR'
+LAWN = 'LAWN'
+PLAZA = 'PLAZA'
+UMN_PATH = os.path.join('data', UMN)
+UMN_INDOOR_PATH = os.path.join(UMN_PATH, 'indoor')
+UMN_LAWN_PATH = os.path.join(UMN_PATH, 'lawn')
+UMN_PLAZA_PATH = os.path.join(UMN_PATH, 'plaza')
+UMN_INDOOR_LABELS_PATH = os.path.join(UMN_INDOOR_PATH, 'umn_indoor_labels.txt')
+UMN_LAWN_LABELS_PATH = os.path.join(UMN_LAWN_PATH, 'umn_lawn_labels.txt')
+UMN_PLAZA_LABELS_PATH = os.path.join(UMN_PLAZA_PATH, 'umn_plaza_labels.txt')
+
+DATASETS = dict(
+    UCSD=dict(
+        PED1=dict(
+            DATASET_PATH=UCSD_PED1_PATH,
+            LABELS_PATH=UCSD_PED1_LABELS_PATH,
+        ),
+        PED2=dict(
+            DATASET_PATH=UCSD_PED2_PATH,
+            LABELS_PATH=UCSD_PED2_LABELS_PATH,
+        ),
+    ),
+    UMN=dict(
+        INDOOR=dict(
+            DATASET_PATH=UMN_INDOOR_PATH,
+            LABELS_PATH=UMN_INDOOR_LABELS_PATH,
+        ),
+        LAWN=dict(
+            DATASET_PATH=UMN_LAWN_PATH,
+            LABELS_PATH=UMN_LAWN_LABELS_PATH,
+        ),
+        PLAZA=dict(
+            DATASET_PATH=UMN_PLAZA_PATH,
+            LABELS_PATH=UMN_PLAZA_LABELS_PATH,
+        ),
+    )
+)
 
 
 def read_image(path: str, flag=cv.IMREAD_GRAYSCALE) -> np.ndarray:
@@ -97,7 +138,7 @@ def get_image_names_from_folder(folder, ext):
         names of images that end with ext
 
     """
-
+    assert os.path.exists(folder), "folder does not exists"
     image_names = [x for x in os.listdir(folder) if x.endswith(ext)]
     return image_names
 
@@ -173,19 +214,15 @@ def make_tensor_from_svoi(svoi: np.ndarray) -> torch.tensor:
     return torch.from_numpy(new_svoi.astype(np.float32))
 
 
-def get_labels_ucsd(dataset, ext, test_num) -> list:
+def get_labels_ucsd(dataset_params: dict) -> list:
     """
     Function for getting labels of one particular dataset in test folder
     of the ped1 or ped2 datasets.
 
     Parameters
     ----------
-    dataset: str
-        where is dataset located? in ped1 or ped2?
-    ext: str
-        extension of pictures in this dataset
-    test_num: int
-        for which test in test folder do we wand labels
+    dataset_params: dict
+        dictionary of dataset parameters
 
     Returns
     -------
@@ -194,8 +231,15 @@ def get_labels_ucsd(dataset, ext, test_num) -> list:
         frames and zeros represent normal
     """
 
-    test_folder = os.path.join("data", "UCSD", f"{dataset}", "Test")
-    labels_file = open(os.path.join(test_folder, f"{dataset}_test_labels.txt"), 'r')
+    dataset = dataset_params['dataset']
+    name = dataset_params['name']
+    dataset_path = DATASETS[dataset][name]['DATASET_PATH']
+    labels_path = DATASETS[dataset][name]['LABELS_PATH']
+    test_num = dataset_params.get('test_num', 1)
+    test_folder = os.path.join(dataset_path, "Test")
+    ext = dataset_params['ext']
+
+    labels_file = open(labels_path, 'r')
     dataset_folder = os.path.join(test_folder, "Test{:03d}".format(test_num))
     num_of_pics = len([x for x in os.listdir(dataset_folder) if x.endswith(ext)])
     num_of_datasets = len([x for x in os.listdir(test_folder) if re.match('Test[0-9]{3}$', x)])
@@ -230,6 +274,55 @@ def get_labels_ucsd(dataset, ext, test_num) -> list:
     return labels
 
 
+def get_labels_umn(dataset_params):
+    """
+    Function for getting labels of one particular dataset in test folder
+    of the umn datasets.
+
+    Parameters
+    ----------
+    dataset_params: dict
+        dictionary of dataset parameters
+
+    Returns
+    -------
+    labels: list
+        list of ones and zeros where ones represent abnormal
+        frames and zeros represent normal
+    """
+
+    dataset = dataset_params['dataset']
+    name = dataset_params['name']
+    dataset_path = DATASETS[dataset][name]['DATASET_PATH']
+    labels_path = DATASETS[dataset][name]['LABELS_PATH']
+    ext = dataset_params['ext']
+    frames_folder = os.path.join(dataset_path, 'frames')
+    num_of_pics = len([x for x in os.listdir(frames_folder) if x.endswith(ext)])
+
+    labels_file = open(labels_path, 'r')
+
+    labels = []
+    while True:
+
+        line = labels_file.readline()
+
+        if not line:
+            break
+
+        labels = [0] * num_of_pics
+
+        parts = line.split(",")
+        for p in parts:
+            split = p.strip().split(":")
+            lower, upper = int(split[0]), int(split[1])
+            labels[lower - 1: upper] = [1] * (upper - lower + 1)
+        break
+
+    labels_file.close()
+
+    return labels
+
+
 def get_labels_from_dataset(dataset_function, dataset_params):
     """
     Function which returns corresponding function for generating labels.
@@ -246,19 +339,15 @@ def get_labels_from_dataset(dataset_function, dataset_params):
     dataset_function
         function which generates labels for one particular dataset
     """
-    return dataset_function(**dataset_params)
+    return dataset_function(dataset_params)
 
 
-def labels_generator(temporal_length, dataset_function, dataset_params) -> Generator:
+def labels_generator(dataset_params) -> Generator:
     """
     Generic function which generates labels for one particular dataset.
 
     Parameters
     ----------
-    temporal_length: int
-        length in time domain od the SVOI
-    dataset_function
-        function which is used for extracting labels
     dataset_params: dict
         parameters needed for function which extracts labels
 
@@ -267,6 +356,13 @@ def labels_generator(temporal_length, dataset_function, dataset_params) -> Gener
     list_of_labels: list
         list of labels of each frame in SVOI
     """
+
+    if dataset_params['name'] == UCSD:
+        dataset_function = get_labels_ucsd
+    else:
+        dataset_function = get_labels_umn
+
+    temporal_length = int(dataset_params.get('temporal_length', 7))
 
     labels = get_labels_from_dataset(dataset_function, dataset_params)
     current = 0

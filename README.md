@@ -12,9 +12,9 @@ s orginalnim radom na sljedećim bazama: UCSD Dataset, UMN dataset.
 Primarno:
 - [x] (1) izvlačenje SVOI-ja iz slika
 - [ ] (2) proučiti konvolucijske mreže i napraviti arhitekturu (u kodu)
-- [ ] (3) organizirati oznake UCSD dataseta da ih se lako učita u program
-	- [x] (3.1) ped1
-	- [ ] (3.2) ped2
+- [ ] (3) organizirati oznake dataseta da ih se lako učita u program
+	- [x] (3.1) UCSD ped1
+	- [x] (3.2) UCSD ped2
 - [ ] (4) podijeliti onaj drugi dataset u frameove i označiti ih na smislen način
 - [ ] (5) pisanje dokumentacije
 	- [ ] (5.1) projektni zadatak

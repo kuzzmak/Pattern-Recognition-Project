@@ -1,67 +1,63 @@
-import os
-
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
+
+import numpy as np
 
 import util
-from svoi import SVOI
 from model import NetModel
+from svoidataset import SVOIDataset
 
 
 class CNN:
 
-    def __init__(self, model, optimizer, criterion, image_paths):
+    def __init__(self, model, optimizer, criterion, dataset_params):
         self.model = model
         self.optimizer = optimizer
         self.criterion = criterion
-        self.image_paths = image_paths
+        self.dataset_params = dataset_params
 
     def train(self, epochs):
         self.model.train()
 
         for epoch in range(epochs):
 
-            sv = SVOI(self.image_paths)
-            for s in sv.generator():
+            sd = SVOIDataset(self.dataset_params)
+            for s, labels in sd:
+
+                target = int(1 in labels)
+
                 for square, svoi in s.items():
                     resized_svoi = util.resize_svoi(svoi, (32, 32))
                     svoi_tensor = util.make_tensor_from_svoi(resized_svoi)
 
-                    output = self.model(svoi_tensor)
-                    loss = self.criterion(output, target)
+                    # TODO fix this
+                    # output = self.model(svoi_tensor)
+                    # probs = util.get_probabilities_from_cnn_output(output.data[0])
+                    # output = torch.tensor([[np.argmax(probs)]], dtype=torch.float32)
+                    # output = np.argmax(probs)
+                    # loss = self.criterion(output, target)
+                    #
+                    # self.optimizer.zero_grad()
+                    # loss.backward()
+                    # self.optimizer.step()
 
-                    optimizer.zero_grad()
-                    loss.backward()
-                    optimizer.step()
-
-                    print(output)
-
-        # for batch_idx, (data, target) in enumerate(train_loader):
-        #     data, target = data.to(device), target.to(device)
-        #     self.optimizer.zero_grad()
-        #     output = self.model(data)
-        #     loss = F.nll_loss(output, target)
-        #     loss.backward()
-        #     self.optimizer.step()
-        #
-        #     if batch_idx % args.log_interval == 0:
-        #         print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-        #             epoch, batch_idx * len(data), len(train_loader.dataset),
-        #             100. * batch_idx / len(train_loader), loss.item()))
-        #         if args.dry_run:
-        #             break
+            print(f'epoch: {epoch}')
 
 
 if __name__ == "__main__":
-    model = NetModel()
+    _model = NetModel()
 
-    optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
-    criterion = nn.CrossEntropyLoss()
+    _optimizer = torch.optim.SGD(_model.parameters(), lr=0.1)
+    _criterion = nn.CrossEntropyLoss()
 
-    folder_path = os.path.join('data', 'UCSD_Anomaly_Dataset.v1p2', 'UCSDped1', 'Train', 'Train001')
-    image_paths = util.get_image_paths(folder_path, ".tif")
-    cnn = CNN(model, optimizer, criterion, image_paths)
+    _dataset_params_ucsd = dict(
+        dataset=util.UCSD,
+        name=util.PED1,
+        test_num=1,
+        temporal_length=7,
+        ext='.tif',
+    )
+    cnn = CNN(_model, _optimizer, _criterion, _dataset_params_ucsd)
 
-    epochs = 100
-    cnn.train(epochs)
+    _epochs = 100
+    cnn.train(_epochs)

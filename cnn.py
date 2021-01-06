@@ -9,11 +9,12 @@ from svoidataset import SVOIDataset
 
 class CNN:
 
-    def __init__(self, model, optimizer, criterion, save_model, dataset_params):
+    def __init__(self, model, optimizer, criterion, save_model, svoi_params, dataset_params):
         self.model = model
         self.optimizer = optimizer
         self.criterion = criterion
         self.save_model = save_model
+        self.svoi_params = svoi_params
         self.dataset_params = dataset_params
 
     @staticmethod
@@ -44,7 +45,7 @@ class CNN:
 
         for epoch in range(epochs):
 
-            sd = SVOIDataset(self.dataset_params)
+            sd = SVOIDataset(self.svoi_params, self.dataset_params)
             for s, labels in sd:
 
                 target = torch.tensor([int(1 in labels)], dtype=torch.long)

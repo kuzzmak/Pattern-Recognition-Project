@@ -8,9 +8,7 @@ import util
 from model import NetModel
 from cnn import CNN
 
-
 if __name__ == '__main__':
-
     parser = argparse.ArgumentParser(description='Spatial-temporal Convolutional Neural Networks for '
                                                  'Anomaly Detection and Localization in Crowded Scenes.')
 
@@ -20,6 +18,12 @@ if __name__ == '__main__':
                         help='temporal length of the SVOI (default: 7)')
     parser.add_argument('-ss', type=int, default=15, metavar='--square-size',
                         help='square size of the SVOI (default: 15)')
+    parser.add_argument('-sigma', type=float, default=10, metavar='--sigma',
+                        help='levels of optical flow which need to be satisfied in '
+                             'order to consider some square (default: 10)')
+    parser.add_argument('-ps', type=float, default=0.5,
+                        help='how many percent of pixels need to move inside '
+                             'square so square is considered informative')
     parser.add_argument('-resize-images', action='store_true', default=False,
                         help='resize input image to the multiple of square size (default: False)')
     parser.add_argument('-ext', type=str, metavar='--extension', default='.tif',
@@ -41,16 +45,12 @@ if __name__ == '__main__':
         temporal_length=args.tl,
         ext=args.ext,
     )
-
-    folder_path = os.path.join('data', 'UCSD', 'ped1', 'Test', 'Test001')
-    image_paths = util.get_image_paths(folder_path, args.ext)
     svoi_params = dict(
-        image_paths=image_paths,
         resize_images=args.resize_images,
         temporal_length=args.tl,
         square_size=args.ss,
-        sigma=10,
-        p_s=0.5,
+        sigma=args.sigma,
+        p_s=args.ps,
     )
 
     model = NetModel()

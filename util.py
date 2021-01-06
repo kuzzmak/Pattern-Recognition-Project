@@ -1,12 +1,14 @@
 from typing import Generator
+import os
+import re
 
 import cv2 as cv
 import numpy as np
 
 import torch
 
-import os
-import re
+from cnn import CNN
+
 
 UCSD = 'UCSD'
 PED1 = 'PED1'
@@ -357,7 +359,7 @@ def labels_generator(dataset_params) -> Generator:
         list of labels of each frame in SVOI
     """
 
-    if dataset_params['name'] == UCSD:
+    if dataset_params['dataset'] == UCSD:
         dataset_function = get_labels_ucsd
     else:
         dataset_function = get_labels_umn
@@ -376,3 +378,27 @@ def labels_generator(dataset_params) -> Generator:
         current += temporal_length
 
         yield current_labels
+
+
+def load_model(model_path: str) -> CNN:
+    """
+    Loads existing CNN model.
+
+    Parameters
+    ----------
+    model_path: str
+        path to existing model
+
+    Returns
+    -------
+    model: CNN
+        loaded model
+    """
+
+    assert os.path.exists(model_path), 'model path does not exists'
+    print('loading model...')
+    model = torch.load(model_path)
+    print('model loaded')
+    return model
+
+

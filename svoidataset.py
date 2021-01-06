@@ -16,6 +16,7 @@ class SVOIDataset(IterableDataset):
         """
 
         self.dataset_params = dataset_params
+        svoi_params['image_paths'] = self.get_image_paths()
         self.svoi = SVOI(svoi_params)
 
     def __iter__(self) -> Iterator:
@@ -27,20 +28,19 @@ class SVOIDataset(IterableDataset):
     def __getitem__(self, index):
         pass
 
-    @staticmethod
-    def get_image_paths(dataset_params: dict) -> Iterable:
+    def get_image_paths(self) -> Iterable:
 
-        dataset = dataset_params['dataset']
+        dataset = self.dataset_params['dataset']
 
-        dataset_name = dataset_params['name']
-        ext = dataset_params['ext']
+        dataset_name = self.dataset_params['name']
+        ext = self.dataset_params['ext']
         if dataset == util.UCSD:
             if dataset_name == util.PED1:
                 folder_path = util.UCSD_PED1_PATH
             else:
                 folder_path = util.UCSD_PED2_PATH
 
-            test_num = dataset_params.get('test_num', 1)
+            test_num = self.dataset_params.get('test_num', 1)
             frames_folder = os.path.join(folder_path, 'Test', 'Test{:03d}'.format(test_num))
 
         else:

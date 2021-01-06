@@ -31,7 +31,7 @@ Primarno:
 	- [ ] (5.6) literatura
 
 Kod:
-- [ ] (6) napraviti funkciju za normalizaciju slika
+- [x] (6) napraviti funkciju za normalizaciju slika
 - [ ] (7) uravnotežiti razrede koji predstavljaju normalne i abnormalne slike u smislu da jednih i drugih ima podjednako
 
 Sekundarno:

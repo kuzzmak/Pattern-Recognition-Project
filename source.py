@@ -1,4 +1,5 @@
 import argparse
+import os
 
 import torch
 import torch.nn as nn
@@ -33,15 +34,27 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    dataset_params = dict()
-    dataset_params['dataset'] = args.dataset
-    dataset_params['name'] = args.dataset_name
-    dataset_params['test_num'] = args.num
-    dataset_params['temporal_length'] = args.tl
-    dataset_params['ext'] = args.ext
+    dataset_params = dict(
+        dataset=args.dataset,
+        name=args.dataset_name,
+        test_num=args.num,
+        temporal_length=args.tl,
+        ext=args.ext,
+    )
+
+    folder_path = os.path.join('data', 'UCSD', 'ped1', 'Test', 'Test001')
+    image_paths = util.get_image_paths(folder_path, args.ext)
+    svoi_params = dict(
+        image_paths=image_paths,
+        resize_images=args.resize_images,
+        temporal_length=args.tl,
+        square_size=args.ss,
+        sigma=10,
+        p_s=0.5,
+    )
 
     model = NetModel()
     optimizer = torch.optim.SGD(model.parameters(), lr=args.lr)
     criterion = nn.CrossEntropyLoss()
-    cnn = CNN(model, optimizer, criterion, args.save_model, dataset_params)
+    cnn = CNN(model, optimizer, criterion, args.save_model, svoi_params, dataset_params)
     cnn.train(args.e)

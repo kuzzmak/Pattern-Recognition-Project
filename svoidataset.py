@@ -9,15 +9,14 @@ from svoi import SVOI
 
 class SVOIDataset(IterableDataset):
 
-    def __init__(self, dataset_params: dict):
+    def __init__(self, svoi_params: dict, dataset_params: dict):
         """
         Class representing iterable dataset where each iteration consists of SVOI
         and corresponding labels for each frame of SVOI.
         """
 
         self.dataset_params = dataset_params
-        self.image_paths = self.get_image_paths(dataset_params)
-        self.svoi = SVOI(self.image_paths)
+        self.svoi = SVOI(svoi_params)
 
     def __iter__(self) -> Iterator:
         return zip(

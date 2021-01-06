@@ -8,7 +8,7 @@ from typing import Tuple, Dict
 
 class SVOI:
 
-    def __init__(self, image_paths, resize_images=False, temporal_length=7, square_size=15):
+    def __init__(self, svoi_params):
         """
         Class used for extracting spatial-temporal volumes of interest (SVOI).
         SVOI consists of temporal_length frames in time domain. Although it's
@@ -27,45 +27,40 @@ class SVOI:
 
         Parameters
         ----------
-        image_paths: List[str]
-            paths of all images used in SVOI extraction
-        resize_images: bool
-            resize images in a way that each size is the multiple of the square size
-        temporal_length: int
-            how many frames in time domain is used in SVOI
-        square_size: int
-            size of the square into which image is divided
+        svoi_params: dict
+            parameters used for generating SVOIs
         """
 
-        self.image_paths = image_paths
+        self.image_paths = svoi_params['image_paths']
         assert len(self.image_paths) > 0, "there are no images in folder"
 
-        self.resize_images = resize_images
-        self.temporal_length = temporal_length
-        self.square_size = square_size
+        self.resize_images = svoi_params['resize_images']
+        self.temporal_length = svoi_params['temporal_length']
+        self.square_size = svoi_params['square_size']
         # shape of every image used in SVOI extraction
         self.image_shape = cv.imread(self.image_paths[0]).shape
-        # change image shape if resizing is used
-        if resize_images:
-            self.image_shape = util.new_image_shape(self.image_shape, self.square_size)
         # creates an image filled with zero intensities with the same dimensions as the frame
         self.mask = np.zeros(self.image_shape, dtype='uint8')
+        # change image shape if resizing is used
+        if self.resize_images:
+            self.image_shape = util.new_image_shape(self.image_shape, self.square_size)
+            self.mask = np.zeros(shape=(*self.image_shape, 3), dtype='uint8')
         # ets image saturation to maximum
         self.mask[..., 1] = 255
         # total pixels in one frame of a SVOI
-        self.total_pixels_in_square = square_size * square_size
+        self.total_pixels_in_square = self.square_size ** 2
         # pixel intensities greater or equal to sigma must be in
         # newly made rgb image which shows deep optical flow
-        self.sigma = 10
+        self.sigma = svoi_params['sigma']
         # percent of pixels in SVOI square that need to change
         # (from one frame to another) to be considered useful
-        self.p_s = 0.5
+        self.p_s = svoi_params['p_s']
         # smallest number of squares which need to be present in
         # temporal_length frames in SVOI
-        self.num_of_squares = 3
+        self.num_of_squares = int(np.floor(self.temporal_length / 2))
         # how many steps in x direction of the image when going square by square
-        self.step_x = int(self.image_shape[1] / square_size)
-        self.step_y = int(self.image_shape[0] / square_size)
+        self.step_x = int(self.image_shape[1] / self.square_size)
+        self.step_y = int(self.image_shape[0] / self.square_size)
 
         self.farneback_params = dict(pyr_scale=0.5,
                                      levels=3,
@@ -100,7 +95,7 @@ class SVOI:
 
     def count_total_incidence_by_channel(self, incidence_of_squares_by_frame):
         incidence_of_squares_total = {}
-        for channel in range(self.image_shape[2]):
+        for channel in range(3):
             for k, v in incidence_of_squares_by_frame[channel].items():
                 if v >= self.num_of_squares:
                     if k not in incidence_of_squares_total:
@@ -147,14 +142,14 @@ class SVOI:
             current_frames.append(prev_gray)
 
             incidence_of_squares_by_frame = {}
-            for j in range(self.image_shape[2]):
+            for j in range(3):
                 incidence_of_squares_by_frame[j] = {}
 
             for j in range(1, self.temporal_length):
                 # remaining temporal_length - 1 frames
                 gray = util.read_image(self.image_paths[i + j])
                 if self.resize_images:
-                    prev_gray = util.resize_image(prev_gray, self.image_shape)
+                    gray = util.resize_image(gray, self.image_shape)
                 current_frames.append(gray)
 
                 flow = cv.calcOpticalFlowFarneback(prev_gray, gray, None, **self.farneback_params)
@@ -162,7 +157,6 @@ class SVOI:
                 self.mask[..., 0] = angle * 180 / np.pi / 2
                 self.mask[..., 2] = cv.normalize(magnitude, None, 0, 255, cv.NORM_MINMAX)
                 rgb_new = cv.cvtColor(self.mask, cv.COLOR_HSV2BGR)
-
                 # pixels that satisfy condition, pixels which intensities
                 # are greater than some threshold
                 satisfies = rgb_new >= self.sigma

@@ -1,4 +1,4 @@
-from typing import Generator
+from typing import Generator, List
 import os
 import re
 
@@ -119,7 +119,8 @@ def resize_image(image: np.ndarray, preferred_size: tuple) -> np.ndarray:
         image that was resized
     """
 
-    return cv.resize(image, preferred_size, interpolation=cv.INTER_AREA)
+    size = (preferred_size[1], preferred_size[0])
+    return cv.resize(image, size, interpolation=cv.INTER_AREA)
 
 
 def get_image_names_from_folder(folder, ext):
@@ -145,7 +146,7 @@ def get_image_names_from_folder(folder, ext):
     return image_names
 
 
-def get_image_paths(folder_path: str, ext: str) -> list:
+def get_image_paths(folder_path: str, ext: str) -> List[str]:
     """
     Function for getting all image path in folder.
 
@@ -400,5 +401,28 @@ def load_model(model_path: str) -> CNN:
     model = torch.load(model_path)
     print('model loaded')
     return model
+
+
+def normalize_image(image, mean, std):
+    """
+    Normalizes image by subtracting mean of the dataset
+    and dividing by standard deviation of the dataset.
+
+    Parameters
+    ----------
+    image: np.ndarray
+        image to normalize
+    mean: float
+        mean of the dataset
+    std: float
+        standard deviation of the dataset
+
+    Returns
+    -------
+    normalized_image: np.ndarray
+        normalized image
+    """
+
+    return (image - mean) / std
 
 

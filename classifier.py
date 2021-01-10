@@ -1,4 +1,4 @@
-from svoi2 import SVOI
+from svoi import SVOI
 import util
 from cnn import CNN
 

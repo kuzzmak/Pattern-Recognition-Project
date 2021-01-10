@@ -24,6 +24,8 @@ if __name__ == '__main__':
     parser.add_argument('-ps', type=float, default=0.5,
                         help='how many percent of pixels need to move inside '
                              'square so square is considered informative')
+    parser.add_argument('-ts', type=float, default=0.7, metavar='--training_set_size',
+                        help='how many percent of data is used for training')
     parser.add_argument('-resize-images', action='store_true', default=False,
                         help='resize input image to the multiple of square size (default: False)')
     parser.add_argument('-ext', type=str, metavar='--extension', default='.tif',
@@ -34,14 +36,13 @@ if __name__ == '__main__':
                         help='which dataset (default: UCSD)')
     parser.add_argument('-dataset_name', type=str, choices=[util.PED1, util.PED2, util.LAWN, util.PLAZA, util.INDOOR],
                         default=util.PED1, help='which dataset name (default: PED1)')
-    parser.add_argument('-num', type=int, default=1, help='which test in UCSD dataset is used to train (default: 1)')
 
     args = parser.parse_args()
 
     dataset_params = dict(
+        training_set_size=args.ts,
         dataset=args.dataset,
         name=args.dataset_name,
-        test_num=args.num,
         temporal_length=args.tl,
         ext=args.ext,
     )
@@ -56,5 +57,5 @@ if __name__ == '__main__':
     model = NetModel()
     optimizer = torch.optim.SGD(model.parameters(), lr=args.lr)
     criterion = nn.CrossEntropyLoss()
-    cnn = CNN(model, optimizer, criterion, args.save_model, svoi_params, dataset_params)
+    cnn = CNN(model, optimizer, criterion, True, svoi_params, dataset_params)
     cnn.train(args.e)

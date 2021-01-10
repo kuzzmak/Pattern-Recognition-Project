@@ -1,5 +1,4 @@
 from typing import Iterator, Iterable
-import os
 
 from torch.utils.data import IterableDataset
 

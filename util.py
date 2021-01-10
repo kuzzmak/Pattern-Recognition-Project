@@ -295,14 +295,13 @@ def get_labels_umn(dataset_params):
         frames and zeros represent normal
     """
 
-    #TODO fix this
-
     dataset = dataset_params['dataset']
     name = dataset_params['name']
     dataset_path = DATASETS[dataset][name]['DATASET_PATH']
     labels_path = DATASETS[dataset][name]['LABELS_PATH']
     ext = dataset_params['ext']
-    frames_folder = os.path.join(dataset_path, 'frames')
+    test_num = dataset_params['test_num']
+    frames_folder = os.path.join(dataset_path, f'frames{test_num}')
     num_of_pics = len([x for x in os.listdir(frames_folder) if x.endswith(ext)])
 
     labels_file = open(labels_path, 'r')
@@ -443,7 +442,8 @@ def get_dataset_and_frames_folders(dataset_params):
         else:
             folder_path = UMN_PLAZA_PATH
 
-        frames_folder = os.path.join(folder_path, 'frames')
+        test_num = dataset_params.get('test_num', 1)
+        frames_folder = os.path.join(folder_path, f'frames{test_num}')
 
     return folder_path, frames_folder
 

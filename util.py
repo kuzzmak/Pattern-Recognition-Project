@@ -1,4 +1,5 @@
 from typing import Generator, List
+import random
 import os
 import re
 
@@ -294,6 +295,8 @@ def get_labels_umn(dataset_params):
         frames and zeros represent normal
     """
 
+    #TODO fix this
+
     dataset = dataset_params['dataset']
     name = dataset_params['name']
     dataset_path = DATASETS[dataset][name]['DATASET_PATH']
@@ -379,6 +382,108 @@ def labels_generator(dataset_params) -> Generator:
         current += temporal_length
 
         yield current_labels
+
+
+def normalize_cnn_output(output):
+    """
+    Normalizes values that come out of the cnn in a way that
+    they represent probability of each class and sum to 1.
+
+    Parameters
+    ----------
+    output: torch.tensor
+        output of the cnn
+
+    Returns
+    -------
+    output: torch.tensor
+        probabilities of each class
+    """
+
+    out = output.data[0]
+    p1 = 1 / (1 + torch.exp(out[1] - out[0]))
+    p2 = 1 / (1 + torch.exp(out[0] - out[1]))
+    return torch.tensor([[p1, p2]], dtype=torch.float32)
+
+
+def get_dataset_and_frames_folders(dataset_params):
+    """
+    Function for getting folder path of the dataset based on the name of the dataset.
+
+    Parameters
+    ----------
+    dataset_params: dict
+        dataset parameters
+
+    Returns
+    -------
+    folder_path, frames_folder: list, list
+        folder of the dataset and folder with images of the dataset
+    """
+
+    dataset = dataset_params['dataset']
+
+    dataset_name = dataset_params['name']
+
+    if dataset == UCSD:
+        if dataset_name == PED1:
+            folder_path = UCSD_PED1_PATH
+        else:
+            folder_path = UCSD_PED2_PATH
+
+        test_num = dataset_params.get('test_num', 1)
+        frames_folder = os.path.join(folder_path, 'Test', 'Test{:03d}'.format(test_num))
+
+    else:
+        # UMN dataset
+        if dataset_name == INDOOR:
+            folder_path = UMN_INDOOR_PATH
+        elif dataset_name == LAWN:
+            folder_path = UMN_LAWN_PATH
+        else:
+            folder_path = UMN_PLAZA_PATH
+
+        frames_folder = os.path.join(folder_path, 'frames')
+
+    return folder_path, frames_folder
+
+
+def train_and_test_indices(dataset_params: dict):
+    """
+    Function which returns folder indices used for training and testing.
+
+    Parameters
+    ----------
+    dataset_params: dict
+        dataset parameters in a form of a dictionary
+
+    Returns
+    -------
+    train_folders, test_folders: list, list
+        lists with indices for training folder and testing folder
+    """
+
+    dataset = dataset_params['dataset']
+    name = dataset_params['name']
+    training_set_size = dataset_params['training_set_size']
+
+    if dataset == UCSD:
+        path = os.path.join('data', dataset, name, 'Test')
+        number_of_folders = len([x for x in os.listdir(path) if re.match('Test[0-9]{3}$', x)])
+
+    else:
+        path = os.path.join('data', dataset, name)
+        number_of_folders = len([x for x in os.listdir(path) if re.match('frames[0-9]$', x)])
+
+    num_of_folders_for_training = int(round(training_set_size * number_of_folders))
+
+    indexes = list(range(1, number_of_folders + 1))
+    random.shuffle(indexes)
+
+    train_folders = set(indexes[:num_of_folders_for_training])
+    test_folders = set(indexes).difference(train_folders)
+
+    return list(train_folders), list(test_folders)
 
 
 def load_model(model_path: str) -> CNN:

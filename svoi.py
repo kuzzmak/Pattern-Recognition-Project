@@ -18,9 +18,14 @@ class SVOI:
 
         How to use:
         -----------
-        folder_path = os.path.join('data', 'UCSD', 'ped1', 'Train', 'Train001')
-        image_paths = util.get_image_paths(folder_path, ".tif")
-        sv = SVOI(image_paths)
+        svoi_params = dict(
+            resize_images=True,
+            temporal_length=7,
+            square_size=15,
+            sigma=10,
+            p_s=0.5,
+        )
+        sv = SVOI(svoi_params)
         for s in sv.generator():
             for square, svoi in s.items():
                 do something with square boundaries or SVOI...
@@ -157,6 +162,7 @@ class SVOI:
                 self.mask[..., 0] = angle * 180 / np.pi / 2
                 self.mask[..., 2] = cv.normalize(magnitude, None, 0, 255, cv.NORM_MINMAX)
                 rgb_new = cv.cvtColor(self.mask, cv.COLOR_HSV2BGR)
+
                 # pixels that satisfy condition, pixels which intensities
                 # are greater than some threshold
                 satisfies = rgb_new >= self.sigma

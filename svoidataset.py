@@ -29,31 +29,16 @@ class SVOIDataset(IterableDataset):
         pass
 
     def get_image_paths(self) -> Iterable:
+        """
+        Function for getting path of all images in current folder
+        so they can be easily loaded.
 
-        dataset = self.dataset_params['dataset']
+        Returns
+        -------
+        image_paths: list
+            paths of images
+        """
 
-        dataset_name = self.dataset_params['name']
-        ext = self.dataset_params['ext']
-        if dataset == util.UCSD:
-            if dataset_name == util.PED1:
-                folder_path = util.UCSD_PED1_PATH
-            else:
-                folder_path = util.UCSD_PED2_PATH
-
-            test_num = self.dataset_params.get('test_num', 1)
-            frames_folder = os.path.join(folder_path, 'Test', 'Test{:03d}'.format(test_num))
-
-        else:
-            # UMN dataset
-            if dataset_name == util.INDOOR:
-                folder_path = util.UMN_INDOOR_PATH
-            elif dataset_name == util.LAWN:
-                folder_path = util.UMN_LAWN_PATH
-            else:
-                folder_path = util.UMN_PLAZA_PATH
-
-            frames_folder = os.path.join(folder_path, 'frames')
-
-        image_paths = util.get_image_paths(frames_folder, ext)
-
+        _, frames_folder = util.get_dataset_and_frames_folders(self.dataset_params)
+        image_paths = util.get_image_paths(frames_folder, self.dataset_params['ext'])
         return image_paths

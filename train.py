@@ -1,5 +1,4 @@
 import argparse
-import os
 
 import torch
 import torch.nn as nn
@@ -9,8 +8,7 @@ from model import NetModel
 from cnn import CNN
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Spatial-temporal Convolutional Neural Networks for '
-                                                 'Anomaly Detection and Localization in Crowded Scenes.')
+    parser = argparse.ArgumentParser(description='Training spatial temporal convolutional neural network')
 
     parser.add_argument('-e', type=int, default=20, metavar='--epochs', help='number of epochs to train (default: 20)')
     parser.add_argument('-lr', type=float, default=1.0, metavar='--learning-rate', help='learning rate (default: 1.0)')
@@ -34,7 +32,7 @@ if __name__ == '__main__':
                         help='for saving the current model')
     parser.add_argument('-dataset', type=str, choices=[util.UCSD, util.UMN], default=util.UCSD,
                         help='which dataset (default: UCSD)')
-    parser.add_argument('-dataset_name', type=str, choices=[util.PED1, util.PED2, util.LAWN, util.PLAZA, util.INDOOR],
+    parser.add_argument('-dataset-name', type=str, choices=[util.PED1, util.PED2, util.LAWN, util.PLAZA, util.INDOOR],
                         default=util.PED1, help='which dataset name (default: PED1)')
 
     args = parser.parse_args()

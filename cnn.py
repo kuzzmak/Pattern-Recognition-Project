@@ -1,4 +1,6 @@
 import os
+import random
+
 from tqdm import tqdm
 
 import torch
@@ -51,10 +53,11 @@ class CNN:
         """
 
         self.model.train()
+        train_indexes, _ = util.train_and_test_indices(self.dataset_params)
 
         for _ in tqdm(range(epochs), desc='Epoch: '):
 
-            train_indexes, _ = util.train_and_test_indices(self.dataset_params)
+            random.shuffle(train_indexes)
 
             # for all folders that are used in training
             for index in tqdm(range(len(train_indexes)), desc='\tFolder: '):

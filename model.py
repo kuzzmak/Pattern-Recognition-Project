@@ -5,6 +5,10 @@ import torch.nn as nn
 class NetModel(nn.Module):
 
     def __init__(self):
+        """
+        Class representing convolutional neural network architecture.
+        """
+
         super(NetModel, self).__init__()
 
         self.features = nn.Sequential(
@@ -26,11 +30,24 @@ class NetModel(nn.Module):
 
         self.classifier = nn.Sequential(
             nn.Linear(in_features=64, out_features=128),  # out [1, 128]
-            nn.ReLU(),
             nn.Linear(in_features=128, out_features=2),   # out [1, 2]
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Method for passing input through network.
+
+        Parameters
+        ----------
+        x: torch.tensor
+            input SVOI
+
+        Returns
+        -------
+        output: torch.tensor
+            output of the network
+        """
+
         x = self.features(x)
         x = torch.flatten(x, 1)
         x = self.classifier(x)

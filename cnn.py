@@ -86,7 +86,8 @@ class CNN:
 
         if self.save_model:
             print('saving model')
-            model_path = os.path.join('models', 'cnn.pt')
+            new_id = util.save_model_data(self.dataset_params, self.svoi_params)
+            model_path = os.path.join('models', f'{new_id}.pt')
             torch.save(self, model_path)
             print('model saved to: ', model_path)
 

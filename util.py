@@ -1,5 +1,7 @@
 from typing import Generator, List
 import random
+import json
+import uuid
 import os
 import re
 
@@ -58,6 +60,8 @@ DATASETS = dict(
         ),
     )
 )
+
+MODELS_DATA_PATH = os.path.join('models', 'models_data.json')
 
 
 def read_image(path: str, flag=cv.IMREAD_GRAYSCALE) -> np.ndarray:
@@ -530,4 +534,34 @@ def normalize_image(image, mean, std):
 
     return (image - mean) / std
 
+
+def save_model_data(dataset_params, svoi_params):
+
+    new_id = str(uuid.uuid1())
+
+    with open(os.path.join(MODELS_DATA_PATH, 'models_data.json')) as json_file:
+        data = json.load(json_file)
+        temp = data['models']
+        y = {
+            'id': new_id,
+            'dataset_parameters': {
+                'dataset': dataset_params['dataset'],
+                'name': dataset_params['name'],
+                'training_set_size': dataset_params['training_set_size'],
+                'ext': dataset_params['ext']
+            },
+            'SVOI parameters': {
+                'temporal_length': svoi_params['temporal_length'],
+                'square_size': svoi_params['square_size'],
+                'resize_images': svoi_params['resize_images'],
+                'sigma': svoi_params['sigma'],
+                'p_s': svoi_params['p_s'],
+            }
+        }
+        temp.append(y)
+
+    with open(os.path.join(MODELS_DATA_PATH, 'models_data.json'), 'w') as f:
+        json.dump(data, f, indent=4)
+
+    return new_id
 

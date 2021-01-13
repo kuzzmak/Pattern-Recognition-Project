@@ -10,8 +10,6 @@ import numpy as np
 
 import torch
 
-from cnn import CNN
-
 
 UCSD = 'UCSD'
 PED1 = 'PED1'
@@ -490,7 +488,7 @@ def train_and_test_indices(dataset_params: dict):
     return list(train_folders), list(test_folders)
 
 
-def load_model(model_path: str) -> CNN:
+def load_model(model_path: str):
     """
     Loads existing CNN model.
 
@@ -539,7 +537,7 @@ def save_model_data(dataset_params, svoi_params):
 
     new_id = str(uuid.uuid1())
 
-    with open(os.path.join(MODELS_DATA_PATH, 'models_data.json')) as json_file:
+    with open(os.path.join(MODELS_DATA_PATH)) as json_file:
         data = json.load(json_file)
         temp = data['models']
         y = {
@@ -560,7 +558,7 @@ def save_model_data(dataset_params, svoi_params):
         }
         temp.append(y)
 
-    with open(os.path.join(MODELS_DATA_PATH, 'models_data.json'), 'w') as f:
+    with open(os.path.join(MODELS_DATA_PATH), 'w') as f:
         json.dump(data, f, indent=4)
 
     return new_id

@@ -42,19 +42,16 @@ class CNN:
         self.svoi_params = svoi_params
         self.dataset_params = dataset_params
 
-    def train(self, epochs: int):
+    def train(self):
         """
         Method used for cnn training.
-
-        Parameters
-        ----------
-        epochs: int
-            number of iterations
         """
 
         self.model.train()
 
         train_indices, test_indices = util.train_and_test_indices(self.dataset_params)
+        device = self.dataset_params['device']
+        epochs = self.dataset_params['epochs']
 
         for _ in tqdm(range(epochs), desc='Epoch: '):
 
@@ -67,17 +64,16 @@ class CNN:
 
                 # make SVOIs and corresponding labels for current dataset folder
                 sd = SVOIDataset(self.svoi_params, self.dataset_params)
-                for s, svoi, label in sd:
+                for svois, targets in sd:
 
-                    target = torch.tensor([label], dtype=torch.long)
+                    targets = targets.to(device)
+                    inputs = svois.to(device)
 
-                    resized_svoi = util.resize_svoi(svoi, (32, 32))
-                    svoi_tensor = util.make_tensor_from_svoi(resized_svoi)
-
-                    output = self.model(svoi_tensor)
+                    output = self.model(inputs)
                     output = util.normalize_cnn_output(output)
+                    output = output.to(device)
 
-                    loss = self.criterion(output, target)
+                    loss = self.criterion(output, targets)
                     loss = Variable(loss, requires_grad=True)
 
                     self.optimizer.zero_grad()

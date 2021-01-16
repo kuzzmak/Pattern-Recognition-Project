@@ -58,7 +58,7 @@ class CNN:
             random.shuffle(train_indices)
 
             # for all folders that are used in training
-            for index in tqdm(range(len(train_indices)), desc='\tTrain Folder: '):
+            for index in tqdm(range(len(train_indices)), desc='\tTrain Folder: ', leave=False):
 
                 self.dataset_params['test_num'] = train_indices[index]
 
@@ -80,8 +80,8 @@ class CNN:
                     loss.backward()
                     self.optimizer.step()
 
-            # calculate errors
-            self.test(test_indices)
+            acc = self.test(test_indices)
+            tqdm.write(f'acc: {acc}')
 
         if self.save_model:
             print('saving model')
@@ -125,7 +125,7 @@ class CNN:
                     output = util.normalize_cnn_output(output)
                     output = output.to(device)
 
-                    out = torch.argmax(output, dim=1)
-                    correct += torch.sum((out == targets).int()).item()
+                    _, predicted = torch.max(output.data, 1)
+                    correct += (predicted == targets).sum().item()
 
-            print('Acc: ', str(correct / total))
+        return correct / total

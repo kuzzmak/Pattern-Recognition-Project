@@ -105,6 +105,8 @@ class CNN:
         correct = 0
         total = 0
 
+        device = self.dataset_params['device']
+
         with torch.no_grad():
 
             for index in tqdm(range(len(test_indices)), desc='\tTest Folder: '):
@@ -112,19 +114,18 @@ class CNN:
                 self.dataset_params['test_num'] = test_indices[index]
 
                 sd = SVOIDataset(self.svoi_params, self.dataset_params)
-                for s, svoi, label in sd:
-                    total += 1
+                for svois, targets in sd:
 
-                    target = torch.tensor([label], dtype=torch.long)
+                    total += svois.shape[0]
 
-                    resized_svoi = util.resize_svoi(svoi, (32, 32))
-                    svoi_tensor = util.make_tensor_from_svoi(resized_svoi)
+                    targets = targets.to(device)
+                    inputs = svois.to(device)
 
-                    output = self.model(svoi_tensor)
+                    output = self.model(inputs)
                     output = util.normalize_cnn_output(output)
+                    output = output.to(device)
 
-                    out = torch.argmax(output)
-                    if out.item() == target.item():
-                        correct += 1
+                    out = torch.argmax(output, dim=1)
+                    correct += torch.sum((out == targets).int()).item()
 
             print('Acc: ', str(correct / total))

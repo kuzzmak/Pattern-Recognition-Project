@@ -10,7 +10,7 @@ if __name__ == '__main__':
     parser.add_argument('-m', type=str, default=os.path.join('models', 'cnn.pt'), metavar='--model',
                         help='path to cnn model')
 
-    parser.add_argument('-f', type=str, default=os.path.join('data', 'UCSD', 'ped1', 'Test', 'Test001'),
+    parser.add_argument('-f', type=str, default=os.path.join('data', 'UCSD', 'PED1', 'Test', 'Test001'),
                         metavar='--folder', help='folder with images')
 
     parser.add_argument('-ext', type=str, default='.tif', metavar='--extension', help='image extension')

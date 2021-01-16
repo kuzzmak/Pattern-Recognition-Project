@@ -15,8 +15,8 @@ UCSD = 'UCSD'
 PED1 = 'PED1'
 PED2 = 'PED2'
 UCSD_PATH = os.path.join('data', UCSD)
-UCSD_PED1_PATH = os.path.join(UCSD_PATH, 'ped1')
-UCSD_PED2_PATH = os.path.join(UCSD_PATH, 'ped2')
+UCSD_PED1_PATH = os.path.join(UCSD_PATH, 'PED1')
+UCSD_PED2_PATH = os.path.join(UCSD_PATH, 'PED2')
 UCSD_PED1_LABELS_PATH = os.path.join(UCSD_PED1_PATH, 'Test', 'ped1_test_labels.txt')
 UCSD_PED2_LABELS_PATH = os.path.join(UCSD_PED2_PATH, 'Test', 'ped2_test_labels.txt')
 
@@ -31,6 +31,11 @@ UMN_PLAZA_PATH = os.path.join(UMN_PATH, 'plaza')
 UMN_INDOOR_LABELS_PATH = os.path.join(UMN_INDOOR_PATH, 'umn_indoor_labels.txt')
 UMN_LAWN_LABELS_PATH = os.path.join(UMN_LAWN_PATH, 'umn_lawn_labels.txt')
 UMN_PLAZA_LABELS_PATH = os.path.join(UMN_PLAZA_PATH, 'umn_plaza_labels.txt')
+
+UCSD_EXT = '.tif'
+UMN_EXT = '.png'
+
+UCSD_GT_EXT = '.bmp'
 
 DATASETS = dict(
     UCSD=dict(
@@ -223,7 +228,7 @@ def make_tensor_from_svoi(svoi: np.ndarray) -> torch.tensor:
 def get_labels_ucsd(dataset_params: dict) -> list:
     """
     Function for getting labels of one particular dataset in test folder
-    of the ped1 or ped2 datasets.
+    of the PED1 or PED2 datasets.
 
     Parameters
     ----------
@@ -401,10 +406,12 @@ def normalize_cnn_output(output):
         probabilities of each class
     """
 
-    out = output.data[0]
-    p1 = 1 / (1 + torch.exp(out[1] - out[0]))
-    p2 = 1 / (1 + torch.exp(out[0] - out[1]))
-    return torch.tensor([[p1, p2]], dtype=torch.float32)
+    out = output.data
+    p1 = 1 / (1 + torch.exp(out[:, 1] - out[:, 0]))
+    p2 = 1 / (1 + torch.exp(out[:, 0] - out[:, 1]))
+    output = torch.stack([p1, p2], dim=1)
+    output = torch.reshape(output, (out.shape[0], 2))
+    return output
 
 
 def get_dataset_and_frames_folders(dataset_params):
@@ -470,8 +477,26 @@ def train_and_test_indices(dataset_params: dict):
     training_set_size = dataset_params['training_set_size']
 
     if dataset == UCSD:
+
         path = os.path.join('data', dataset, name, 'Test')
-        number_of_folders = len([x for x in os.listdir(path) if re.match('Test[0-9]{3}$', x)])
+
+        if dataset_params['only_gt']:
+
+            gt_names = [x for x in os.listdir(path) if re.match('Test[0-9]{3}_gt$', x)]
+            indexes = [re.findall('[0-9]{3}', x)[0] for x in gt_names]
+            indexes = [x.lstrip('0') for x in indexes]
+            indexes = [int(x) for x in indexes]
+
+            total_gt_folders = len(indexes)
+            num_of_folders_for_training = int(round(training_set_size * total_gt_folders))
+
+            train_folders = set(indexes[:num_of_folders_for_training])
+            test_folders = set(indexes).difference(train_folders)
+
+            return list(train_folders), list(test_folders)
+
+        else:
+            number_of_folders = len([x for x in os.listdir(path) if re.match('Test[0-9]{3}$', x)])
 
     else:
         path = os.path.join('data', dataset, name)
@@ -562,4 +587,12 @@ def save_model_data(dataset_params, svoi_params):
         json.dump(data, f, indent=4)
 
     return new_id
+
+
+def get_ground_truth_image_paths(dataset_params):
+    _, frames_folder = get_dataset_and_frames_folders(dataset_params)
+    gt_path = frames_folder + '_gt'
+    gt_images = [x for x in os.listdir(gt_path) if x.endswith(UCSD_GT_EXT)]
+    gt_image_paths = [os.path.join(gt_path, x) for x in gt_images]
+    return gt_image_paths
 

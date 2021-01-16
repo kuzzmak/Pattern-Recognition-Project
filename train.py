@@ -37,11 +37,17 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
     dataset_params = dict(
         training_set_size=args.ts,
         dataset=args.dataset,
         name=args.dataset_name,
         temporal_length=args.tl,
+        only_gt=True,
+        device=device,
+        batch_size=10,
+        epochs=args.e,
         ext=args.ext,
     )
     svoi_params = dict(
@@ -52,8 +58,8 @@ if __name__ == '__main__':
         p_s=args.ps,
     )
 
-    model = NetModel()
+    model = NetModel().to(device)
     optimizer = torch.optim.SGD(model.parameters(), lr=args.lr)
     criterion = nn.CrossEntropyLoss()
     cnn = CNN(model, optimizer, criterion, True, svoi_params, dataset_params)
-    cnn.train(args.e)
+    cnn.train()

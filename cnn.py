@@ -42,50 +42,46 @@ class CNN:
         self.svoi_params = svoi_params
         self.dataset_params = dataset_params
 
-    def train(self, epochs: int):
+    def train(self):
         """
         Method used for cnn training.
-
-        Parameters
-        ----------
-        epochs: int
-            number of iterations
         """
 
         self.model.train()
-        train_indexes, _ = util.train_and_test_indices(self.dataset_params)
+
+        train_indices, test_indices = util.train_and_test_indices(self.dataset_params)
+        device = self.dataset_params['device']
+        epochs = self.dataset_params['epochs']
 
         for _ in tqdm(range(epochs), desc='Epoch: '):
 
-            random.shuffle(train_indexes)
+            random.shuffle(train_indices)
 
             # for all folders that are used in training
-            for index in tqdm(range(len(train_indexes)), desc='\tFolder: '):
+            for index in tqdm(range(len(train_indices)), desc='\tTrain Folder: ', leave=False):
 
-                self.dataset_params['test_num'] = train_indexes[index]
+                self.dataset_params['test_num'] = train_indices[index]
 
                 # make SVOIs and corresponding labels for current dataset folder
                 sd = SVOIDataset(self.svoi_params, self.dataset_params)
-                for s, labels in sd:
+                for svois, targets in sd:
 
-                    target = torch.tensor([int(1 in labels)], dtype=torch.long)
+                    targets = targets.to(device)
+                    inputs = svois.to(device)
 
-                    for square, svoi in s.items():
-                        resized_svoi = util.resize_svoi(svoi, (32, 32))
-                        svoi_tensor = util.make_tensor_from_svoi(resized_svoi)
+                    output = self.model(inputs)
+                    output = util.normalize_cnn_output(output)
+                    output = output.to(device)
 
-                        output = self.model(svoi_tensor)
-                        output = util.normalize_cnn_output(output)
+                    loss = self.criterion(output, targets)
+                    loss = Variable(loss, requires_grad=True)
 
-                        loss = self.criterion(output, target)
-                        loss = Variable(loss, requires_grad=True)
+                    self.optimizer.zero_grad()
+                    loss.backward()
+                    self.optimizer.step()
 
-                        self.optimizer.zero_grad()
-                        loss.backward()
-                        self.optimizer.step()
-
-            # calculate errors
-            # self.test()
+            acc = self.test(test_indices)
+            tqdm.write(f'acc: {acc}')
 
         if self.save_model:
             print('saving model')
@@ -94,7 +90,7 @@ class CNN:
             torch.save(self, model_path)
             print('model saved to: ', model_path)
 
-    def test(self):
+    def test(self, test_indices):
         """
         Used for evaluating classifier on new data.
 
@@ -104,34 +100,32 @@ class CNN:
             error percent
         """
 
-        _, test_indexes = util.train_and_test_indices(self.dataset_params)
-        for index in tqdm(range(len(test_indexes)), desc='\tFolder: '):
+        # self.model.eval()
 
-            self.dataset_params['test_num'] = test_indexes[index]
+        correct = 0
+        total = 0
 
-            # number of temporal_length frames which contain abnormal frame
-            abnormal_frames_truth = 0
-            # number of temporal_length frames which cnn classified as abnormal
-            abnormal_frames_classified = 0
+        device = self.dataset_params['device']
 
-            sd = SVOIDataset(self.svoi_params, self.dataset_params)
-            for s, labels in sd:
+        with torch.no_grad():
 
-                target = torch.tensor([int(1 in labels)], dtype=torch.long)
-                if target.item() == 1:
-                    abnormal_frames_truth += 1
+            for index in tqdm(range(len(test_indices)), desc='\tTest Folder: '):
 
-                for square, svoi in s.items():
-                    resized_svoi = util.resize_svoi(svoi, (32, 32))
-                    svoi_tensor = util.make_tensor_from_svoi(resized_svoi)
+                self.dataset_params['test_num'] = test_indices[index]
 
-                    output = self.model(svoi_tensor)
+                sd = SVOIDataset(self.svoi_params, self.dataset_params)
+                for svois, targets in sd:
+
+                    total += svois.shape[0]
+
+                    targets = targets.to(device)
+                    inputs = svois.to(device)
+
+                    output = self.model(inputs)
                     output = util.normalize_cnn_output(output)
+                    output = output.to(device)
 
-                    out = torch.argmax(output)
-                    if out.item() == 1:
-                        abnormal_frames_classified += 1
-                        break
+                    _, predicted = torch.max(output.data, 1)
+                    correct += (predicted == targets).sum().item()
 
-            print('Error: ')
-            print(abs(abnormal_frames_truth - abnormal_frames_classified))
+        return correct / total

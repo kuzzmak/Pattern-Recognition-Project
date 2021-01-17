@@ -63,7 +63,10 @@ DATASETS = dict(
     )
 )
 
-MODELS_DATA_PATH = os.path.join('models', 'models_data.json')
+MODELS_PATH = 'models'
+MODELS_DATA_PATH = os.path.join(MODELS_PATH, 'models_data.json')
+
+ACC_FILE_PATH = os.path.join(MODELS_PATH, 'acc_file.txt')
 
 
 def read_image(path: str, flag=cv.IMREAD_GRAYSCALE) -> np.ndarray:
@@ -529,7 +532,7 @@ def load_model(model_path: str):
 
     assert os.path.exists(model_path), 'model path does not exists'
     print('loading model...')
-    model = torch.load(model_path)
+    model = torch.load(model_path, map_location=torch.device('cpu'))
     print('model loaded')
     return model
 
@@ -604,6 +607,20 @@ def save_model_data(dataset_params, svoi_params):
 
 
 def get_ground_truth_image_paths(dataset_params):
+    """
+    Function for getting ground truth images for UCSD dataset.
+
+    Parameters
+    ----------
+    dataset_params: dict
+        dataset parameters
+
+    Returns
+    -------
+    gt_image_paths: List
+        image paths
+    """
+
     try:
         _, frames_folder = get_dataset_and_frames_folders(dataset_params)
         gt_path = frames_folder + '_gt'
@@ -613,3 +630,24 @@ def get_ground_truth_image_paths(dataset_params):
 
     except FileNotFoundError:
         return []
+
+
+def test_models():
+    """
+    Function for evaluating available models in "models" folder.
+    Writes results to "acc_file.txt" in folder "models".
+    """
+
+    acc_file = open(ACC_FILE_PATH, 'w')
+
+    with open(MODELS_DATA_PATH) as json_file:
+        data = json.load(json_file)
+        models = data['models']
+        for model_json in models:
+            model_id = model_json['id']
+            cnn = load_model(os.path.join(MODELS_PATH, model_id + '.pt'))
+            cnn.dataset_params['device'] = 'cpu'
+            acc = cnn.test()
+            acc_file.write(model_id + ':' + str(acc) + '\n')
+
+    acc_file.close()

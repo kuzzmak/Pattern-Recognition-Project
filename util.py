@@ -10,7 +10,6 @@ import numpy as np
 
 import torch
 
-
 UCSD = 'UCSD'
 PED1 = 'PED1'
 PED2 = 'PED2'
@@ -559,6 +558,16 @@ def normalize_image(image, mean, std):
 
 
 def save_model_data(dataset_params, svoi_params):
+    """
+    Saves all parameters used in training to a file in JSON format.
+
+    Parameters
+    ----------
+    dataset_params: dict
+        dataset parameters
+    svoi_params: dict
+        SVOI parameters
+    """
 
     new_id = str(uuid.uuid1())
 
@@ -571,7 +580,12 @@ def save_model_data(dataset_params, svoi_params):
                 'dataset': dataset_params['dataset'],
                 'name': dataset_params['name'],
                 'training_set_size': dataset_params['training_set_size'],
-                'ext': dataset_params['ext']
+                'ext': dataset_params['ext'],
+                'epochs': dataset_params['epochs'],
+                'batch_size': dataset_params['batch_size'],
+                'train_indices': dataset_params['train_indices'],
+                'test_indices': dataset_params['test_indices'],
+                'learning_rate': dataset_params['lr'],
             },
             'SVOI parameters': {
                 'temporal_length': svoi_params['temporal_length'],
@@ -590,9 +604,12 @@ def save_model_data(dataset_params, svoi_params):
 
 
 def get_ground_truth_image_paths(dataset_params):
-    _, frames_folder = get_dataset_and_frames_folders(dataset_params)
-    gt_path = frames_folder + '_gt'
-    gt_images = [x for x in os.listdir(gt_path) if x.endswith(UCSD_GT_EXT)]
-    gt_image_paths = [os.path.join(gt_path, x) for x in gt_images]
-    return gt_image_paths
+    try:
+        _, frames_folder = get_dataset_and_frames_folders(dataset_params)
+        gt_path = frames_folder + '_gt'
+        gt_images = [x for x in os.listdir(gt_path) if x.endswith(UCSD_GT_EXT)]
+        gt_image_paths = [os.path.join(gt_path, x) for x in gt_images]
+        return gt_image_paths
 
+    except FileNotFoundError:
+        return []

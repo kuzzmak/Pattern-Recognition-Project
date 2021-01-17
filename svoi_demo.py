@@ -25,6 +25,7 @@ if __name__ == '__main__':
                              'square so square is considered informative')
     parser.add_argument('-resize-images', action='store_true', default=False,
                         help='resize input image to the multiple of square size (default: False)')
+    parser.add_argument('-a', action='store_true', default=False, help='should frames play normal or on user click')
 
     args = parser.parse_args()
 
@@ -51,4 +52,7 @@ if __name__ == '__main__':
             cv.rectangle(original, (p1[1], p1[0]), (p2[1], p2[0]), (255, 0, 0), 1)
 
         cv.imshow('im', original)
-        cv.waitKey(0)
+        if args.a:
+            cv.waitKey(1)
+        else:
+            cv.waitKey(0)

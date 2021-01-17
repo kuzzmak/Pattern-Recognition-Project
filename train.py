@@ -34,6 +34,8 @@ if __name__ == '__main__':
                         help='which dataset (default: UCSD)')
     parser.add_argument('-dataset-name', type=str, choices=[util.PED1, util.PED2, util.LAWN, util.PLAZA, util.INDOOR],
                         default=util.PED1, help='which dataset name (default: PED1)')
+    parser.add_argument('-only-gt', action='store_true', default=False,
+                        help='use only ground truth directories (default: False, possible only with UCSD)')
 
     args = parser.parse_args()
 
@@ -44,11 +46,12 @@ if __name__ == '__main__':
         dataset=args.dataset,
         name=args.dataset_name,
         temporal_length=args.tl,
-        only_gt=True,
+        only_gt=args.only_gt,
         device=device,
-        batch_size=10,
+        batch_size=20,
         epochs=args.e,
         ext=args.ext,
+        lr=args.lr,
     )
     svoi_params = dict(
         resize_images=args.resize_images,

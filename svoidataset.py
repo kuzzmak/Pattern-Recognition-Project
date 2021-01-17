@@ -41,16 +41,22 @@ class SVOIDataset(IterableDataset):
                 label = 0
                 # frames in SVOI contain abnormal event
                 if 1 in labels:
-                    # ground truth frames which are used to get real label of a SVOI
-                    gt_frames = []
-                    for i in range(frame_index, frame_index - tl, -1):
-                        gt_frames.append(util.read_image(gt_path[i]))
-                    gt_frames = np.stack(gt_frames, axis=0)
+                    # if using only ground truth directories
+                    if self.dataset_params['only_gt']:
+                        # ground truth frames which are used to get real label of a SVOI
+                        gt_frames = []
+                        for i in range(frame_index, frame_index - tl, -1):
+                            gt_frames.append(util.read_image(gt_path[i]))
+                        gt_frames = np.stack(gt_frames, axis=0)
 
-                    p1, p2 = square
-                    svoi_gt = gt_frames[:, p1[0]:p2[0], p1[1]:p2[1]]
+                        p1, p2 = square
+                        svoi_gt = gt_frames[:, p1[0]:p2[0], p1[1]:p2[1]]
 
-                    if 255 in svoi_gt:
+                        if 255 in svoi_gt:
+                            label = 1
+                    # without using ground truth directory, label is abnormal if SVOI contains
+                    # at least one frame which is abnormal
+                    else:
                         label = 1
 
                 resized_svoi = util.resize_svoi(svoi, (32, 32))

@@ -98,6 +98,9 @@
         {
             "id": "85fc0b2a-58c1-11eb-b485-0242ac1c0002",
             "dataset_parameters": {
+                "dataset": "UCSD",
+                "name": "PED1",
+                "training_set_size": 0.7,
                 "epochs": 100,
                 "batch_size": 50,
                 "train_indices": [
@@ -115,6 +118,307 @@
                     3
                 ],
                 "learning_rate": 1.5
+            },
+            "SVOI parameters": {
+                "temporal_length": 7,
+                "square_size": 15,
+                "resize_images": true,
+                "sigma": 10,
+                "p_s": 0.5
+            }
+        },
+        {
+            "id": "1deb90a8-58c6-11eb-b7a1-08979893680b",
+            "dataset_parameters": {
+                "dataset": "UMN",
+                "name": "INDOOR",
+                "training_set_size": 0.7,
+                "ext": ".png",
+                "epochs": 50,
+                "batch_size": 20,
+                "train_indices": [
+                    1,
+                    2,
+                    4,
+                    5
+                ],
+                "test_indices": [
+                    3,
+                    6
+                ],
+                "learning_rate": 0.1
+            },
+            "SVOI parameters": {
+                "temporal_length": 7,
+                "square_size": 20,
+                "resize_images": true,
+                "sigma": 10,
+                "p_s": 0.5
+            }
+        },
+        {
+            "id": "34e43ee8-58ca-11eb-8d32-08979893680b",
+            "dataset_parameters": {
+                "dataset": "UMN",
+                "name": "INDOOR",
+                "training_set_size": 0.7,
+                "ext": ".png",
+                "epochs": 50,
+                "batch_size": 20,
+                "train_indices": [
+                    2,
+                    5,
+                    3,
+                    1
+                ],
+                "test_indices": [
+                    4,
+                    6
+                ],
+                "learning_rate": 0.5
+            },
+            "SVOI parameters": {
+                "temporal_length": 7,
+                "square_size": 20,
+                "resize_images": true,
+                "sigma": 10,
+                "p_s": 0.5
+            }
+        },
+        {
+            "id": "91bee73a-58ca-11eb-84b5-0242ac1c0002",
+            "dataset_parameters": {
+                "dataset": "UCSD",
+                "name": "PED1",
+                "training_set_size": 0.9,
+                "ext": ".tif",
+                "epochs": 70,
+                "batch_size": 50,
+                "train_indices": [
+                    3,
+                    22,
+                    14,
+                    24,
+                    32,
+                    21,
+                    23,
+                    18,
+                    4
+                ],
+                "test_indices": [
+                    19
+                ],
+                "learning_rate": 0.7
+            },
+            "SVOI parameters": {
+                "temporal_length": 7,
+                "square_size": 15,
+                "resize_images": true,
+                "sigma": 10,
+                "p_s": 0.5
+            }
+        },
+        {
+            "id": "94008e23-58cd-11eb-b763-08979893680b",
+            "dataset_parameters": {
+                "dataset": "UMN",
+                "name": "INDOOR",
+                "training_set_size": 0.7,
+                "ext": ".png",
+                "epochs": 30,
+                "batch_size": 20,
+                "train_indices": [
+                    4,
+                    2,
+                    5,
+                    6
+                ],
+                "test_indices": [
+                    1,
+                    3
+                ],
+                "learning_rate": 0.5
+            },
+            "SVOI parameters": {
+                "temporal_length": 7,
+                "square_size": 20,
+                "resize_images": true,
+                "sigma": 10,
+                "p_s": 0.5
+            }
+        },
+        {
+            "id": "1e72cb80-58ce-11eb-b7da-0242ac1c0002",
+            "dataset_parameters": {
+                "dataset": "UCSD",
+                "name": "PED1",
+                "training_set_size": 0.9,
+                "ext": ".tif",
+                "epochs": 30,
+                "batch_size": 10,
+                "train_indices": [
+                    32,
+                    4,
+                    22,
+                    14,
+                    24,
+                    21,
+                    18,
+                    3,
+                    23
+                ],
+                "test_indices": [
+                    19
+                ],
+                "learning_rate": 0.7
+            },
+            "SVOI parameters": {
+                "temporal_length": 7,
+                "square_size": 15,
+                "resize_images": true,
+                "sigma": 10,
+                "p_s": 0.5
+            }
+        },
+        {
+            "id": "1e539b8b-58d6-11eb-90ae-08979893680b",
+            "dataset_parameters": {
+                "dataset": "UMN",
+                "name": "INDOOR",
+                "training_set_size": 0.7,
+                "ext": ".png",
+                "epochs": 20,
+                "batch_size": 20,
+                "train_indices": [
+                    1,
+                    2,
+                    5,
+                    4
+                ],
+                "test_indices": [
+                    3,
+                    6
+                ],
+                "learning_rate": 0.001
+            },
+            "SVOI parameters": {
+                "temporal_length": 7,
+                "square_size": 20,
+                "resize_images": true,
+                "sigma": 10,
+                "p_s": 0.5
+            }
+        },
+        {
+            "id": "1727098c-58d7-11eb-acf9-0242ac1c0002",
+            "dataset_parameters": {
+                "dataset": "UCSD",
+                "name": "PED1",
+                "training_set_size": 0.9,
+                "ext": ".tif",
+                "epochs": 100,
+                "batch_size": 10,
+                "train_indices": [
+                    22,
+                    3,
+                    21,
+                    4,
+                    18,
+                    32,
+                    14,
+                    24,
+                    23
+                ],
+                "test_indices": [
+                    19
+                ],
+                "learning_rate": 0.001
+            },
+            "SVOI parameters": {
+                "temporal_length": 7,
+                "square_size": 15,
+                "resize_images": true,
+                "sigma": 10,
+                "p_s": 0.5
+            }
+        },
+        {
+            "id": "63a1b5dd-58db-11eb-9e90-08979893680b",
+            "dataset_parameters": {
+                "dataset": "UMN",
+                "name": "PLAZA",
+                "training_set_size": 0.7,
+                "ext": ".png",
+                "epochs": 30,
+                "batch_size": 20,
+                "train_indices": [
+                    3,
+                    1
+                ],
+                "test_indices": [
+                    2
+                ],
+                "learning_rate": 0.05
+            },
+            "SVOI parameters": {
+                "temporal_length": 7,
+                "square_size": 20,
+                "resize_images": true,
+                "sigma": 10,
+                "p_s": 0.5
+            }
+        },
+        {
+            "id": "7a4f998e-58de-11eb-a57a-08979893680b",
+            "dataset_parameters": {
+                "dataset": "UMN",
+                "name": "LAWN",
+                "training_set_size": 0.7,
+                "ext": ".png",
+                "epochs": 30,
+                "batch_size": 20,
+                "train_indices": [
+                    1
+                ],
+                "test_indices": [
+                    2
+                ],
+                "learning_rate": 0.04
+            },
+            "SVOI parameters": {
+                "temporal_length": 7,
+                "square_size": 20,
+                "resize_images": true,
+                "sigma": 10,
+                "p_s": 0.5
+            }
+        },
+        {
+            "id": "a059d5e0-58e1-11eb-8ec8-0242ac1c0002",
+            "dataset_parameters": {
+                "dataset": "UCSD",
+                "name": "PED2",
+                "training_set_size": 0.9,
+                "ext": ".tif",
+                "epochs": 50,
+                "batch_size": 30,
+                "train_indices": [
+                    11,
+                    9,
+                    1,
+                    4,
+                    2,
+                    7,
+                    3,
+                    6,
+                    12,
+                    10,
+                    8
+                ],
+                "test_indices": [
+                    5
+                ],
+                "learning_rate": 0.05
             },
             "SVOI parameters": {
                 "temporal_length": 7,

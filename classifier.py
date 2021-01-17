@@ -85,9 +85,11 @@ class Classifier:
                 output = util.normalize_cnn_output(output)
 
                 out = torch.argmax(output)
+
                 if out.item() == 1:
+                    p1, p2 = square
+                    cv.rectangle(im, (p1[1], p1[0]), (p2[1], p2[0]), (255, 0, 0), 1)
                     draw_str(im, 'abnormal')
-                    break
 
             cv.imshow('im', im)
             if autoplay:

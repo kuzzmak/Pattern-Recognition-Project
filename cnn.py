@@ -50,6 +50,9 @@ class CNN:
         self.model.train()
 
         train_indices, test_indices = util.train_and_test_indices(self.dataset_params)
+        self.dataset_params['train_indices'] = train_indices
+        self.dataset_params['test_indices'] = test_indices
+
         device = self.dataset_params['device']
         epochs = self.dataset_params['epochs']
 
@@ -80,8 +83,8 @@ class CNN:
                     loss.backward()
                     self.optimizer.step()
 
-            acc = self.test(test_indices)
-            tqdm.write(f'acc: {acc}')
+            # acc = self.test(test_indices)
+            # tqdm.write(f'acc: {acc}')
 
         if self.save_model:
             print('saving model')
@@ -90,7 +93,7 @@ class CNN:
             torch.save(self, model_path)
             print('model saved to: ', model_path)
 
-    def test(self, test_indices):
+    def test(self):
         """
         Used for evaluating classifier on new data.
 
@@ -109,9 +112,9 @@ class CNN:
 
         with torch.no_grad():
 
-            for index in tqdm(range(len(test_indices)), desc='\tTest Folder: '):
+            for index in tqdm(range(len(self.dataset_params['train_indices'])), desc='\tTest Folder: '):
 
-                self.dataset_params['test_num'] = test_indices[index]
+                self.dataset_params['test_num'] = self.dataset_params['train_indices'][index]
 
                 sd = SVOIDataset(self.svoi_params, self.dataset_params)
                 for svois, targets in sd:

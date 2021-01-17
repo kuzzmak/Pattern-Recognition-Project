@@ -65,6 +65,64 @@
                 "sigma": 10,
                 "p_s": 0.5
             }
+        },
+        {
+            "id": "246540bb-58c1-11eb-9c66-08979893680b",
+            "dataset_parameters": {
+                "dataset": "UMN",
+                "name": "INDOOR",
+                "training_set_size": 0.7,
+                "ext": ".png",
+                "epochs": 20,
+                "batch_size": 20,
+                "train_indices": [
+                    2,
+                    4,
+                    1,
+                    5
+                ],
+                "test_indices": [
+                    3,
+                    6
+                ],
+                "learning_rate": 0.1
+            },
+            "SVOI parameters": {
+                "temporal_length": 7,
+                "square_size": 20,
+                "resize_images": true,
+                "sigma": 10,
+                "p_s": 0.5
+            }
+        },
+        {
+            "id": "85fc0b2a-58c1-11eb-b485-0242ac1c0002",
+            "dataset_parameters": {
+                "epochs": 100,
+                "batch_size": 50,
+                "train_indices": [
+                    32,
+                    21,
+                    22,
+                    23,
+                    18,
+                    14,
+                    4
+                ],
+                "test_indices": [
+                    19,
+                    24,
+                    3
+                ],
+                "learning_rate": 1.5
+            },
+            "SVOI parameters": {
+                "temporal_length": 7,
+                "square_size": 15,
+                "resize_images": true,
+                "sigma": 10,
+                "p_s": 0.5
+            }
         }
     ]
 }

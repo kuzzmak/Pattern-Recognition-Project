@@ -1,4 +1,37 @@
 {
     "models": [
+        {
+            "id": "191056e6-58b5-11eb-b124-08979893680b",
+            "dataset_parameters": {
+                "dataset": "UCSD",
+                "name": "PED1",
+                "training_set_size": 0.7,
+                "ext": ".tif",
+                "epochs": 50,
+                "batch_size": 20,
+                "train_indices": [
+                    14,
+                    22,
+                    21,
+                    19,
+                    18,
+                    3,
+                    4
+                ],
+                "test_indices": [
+                    32,
+                    24,
+                    23
+                ],
+                "learning_rate": 0.1
+            },
+            "SVOI parameters": {
+                "temporal_length": 7,
+                "square_size": 15,
+                "resize_images": true,
+                "sigma": 10,
+                "p_s": 0.5
+            }
+        }
     ]
 }

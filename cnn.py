@@ -112,9 +112,9 @@ class CNN:
 
         with torch.no_grad():
 
-            for index in tqdm(range(len(self.dataset_params['train_indices'])), desc='\tTest Folder: '):
+            for index in tqdm(range(len(self.dataset_params['test_indices'])), desc='\tTest Folder: '):
 
-                self.dataset_params['test_num'] = self.dataset_params['train_indices'][index]
+                self.dataset_params['test_num'] = self.dataset_params['test_indices'][index]
 
                 sd = SVOIDataset(self.svoi_params, self.dataset_params)
                 for svois, targets in sd:

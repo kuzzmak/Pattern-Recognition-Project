@@ -1,2 +1,11 @@
 .idea
+__pycache__
 venv
+cnn2.py
+commands.txt
+svoi2.py
+svoidataset2.py
+svoidataset.py
+test.py
+test2.py
+train.py

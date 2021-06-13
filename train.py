@@ -36,6 +36,7 @@ if __name__ == '__main__':
                         default=util.PED1, help='which dataset name (default: PED1)')
     parser.add_argument('-only-gt', action='store_true', default=False,
                         help='use only ground truth directories (default: False, possible only with UCSD)')
+    parser.add_argument('-bs', type=int, default=10, metavar='--batch-size', help='batch size (default: 10)')
 
     args = parser.parse_args()
 
@@ -48,7 +49,7 @@ if __name__ == '__main__':
         temporal_length=args.tl,
         only_gt=args.only_gt,
         device=device,
-        batch_size=20,
+        batch_size=args.bs,
         epochs=args.e,
         ext=args.ext,
         lr=args.lr,
@@ -64,5 +65,5 @@ if __name__ == '__main__':
     model = NetModel().to(device)
     optimizer = torch.optim.SGD(model.parameters(), lr=args.lr)
     criterion = nn.CrossEntropyLoss()
-    cnn = CNN(model, optimizer, criterion, True, svoi_params, dataset_params)
+    cnn = CNN(model, optimizer, criterion, args.save_model, svoi_params, dataset_params)
     cnn.train()
